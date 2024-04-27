@@ -7,9 +7,18 @@ const RegisterPage = () => {
   const [name, setname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  function registerUser(ev) {
+  async function registerUser(ev) {
     ev.preventDefault();
-    axios.get("http://localhost:4000/test");
+    try {
+      await axios.post("/register", {
+        name,
+        email,
+        password,
+      });
+      alert("registered successfully");
+    } catch (e) {
+      alert("register failed");
+    }
   }
   return (
     <div className="mt-4 grow flex items-center justify-around">
@@ -37,7 +46,7 @@ const RegisterPage = () => {
           <button className="primary">Register</button>
           <div className="text-center py-2 text-gray-500">
             Alreadt a member?{" "}
-            <Link className="underline text-black" to={"/register"}>
+            <Link className="underline text-black" to={"/login"}>
               Login
             </Link>
           </div>
