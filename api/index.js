@@ -10,6 +10,7 @@ const app = express();
 
 
 const bcryptSalt = bcrypt.genSaltSync(10)
+const jwtSecret = 'dlshkdskljdslkdfsffdfddfsjds'
 
 app.use(express.json());
 app.use(cors({
@@ -38,33 +39,33 @@ app.get('/test',(req,res)=>{
     
 })
 
-app.post('/login',async(req,res)=>{
-    const {email,password}=req.body
-    
-        const userFind = await User.findOne({email})
-        if(userFind){
-            res.json('userfind')
-            const passOk= bcrypt.compareSync(password,userFind.password)
-            if(passOk){
-                res.cookie('token', '').json('passok')
-            }
-            else{
-                res.status(422).json('passnotok')
-            }
-        }
-        else{
-            res.json('usernotfound')
-          
-          
-          
-          
-          
-          
-   
-   
-   
-   
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
 
-        }})
+    try {
+        const userDoc = await User.findOne({ email });
+
+        if (!userDoc) {
+            // Email not found
+            return res.status(422).json('usernotfound');
+        }
+
+        const passOk = bcrypt.compareSync(password, userDoc.password);
+
+        if (passOk) {
+            jwt.sign({ email: userDoc.email, id: userDoc._id }, jwtSecret, {}, (err, token) => {
+                if (err) throw err;
+                res.cookie('token', token).json('passok');
+            });
+        } else {
+            // Password not correct
+            res.status(422).json('passnotok');
+        }
+    } catch (error) {
+        // Handle any unexpected errors
+        console.error(error);
+        res.status(500).json('servererror');
+    }
+});
 
 app.listen(4000)
